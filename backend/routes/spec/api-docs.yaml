@@ -1,0 +1,4134 @@
+openapi: "3.0.0"
+info:
+  version: 0.0.1
+  title: Digital Realty Website Backend API
+  description: |
+    Provides the backend/bridge for the digital realty website
+  contact:
+    name: Propane Studios
+servers:
+  - url: /api/v1
+    description: Version 1 of this server
+security:
+  - basicAuth: []
+paths:
+  /user:
+    get:
+      description: Get a list of all users. Logged in user must be in role solutions architect, sales, or admin to receive the user list. Any other role gets denied
+      summary: List all users
+      operationId: listUsers
+      tags:
+        - User
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+        - name: firstName
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserFirstNameField'
+          examples:
+            exactMatch:
+              summary: Match first name exactly
+              value: admin
+            startsWith:
+              summary: Match any name starting with
+              value: 'adm%'
+            endsWith:
+              summary: Match any name ending with
+              value: '%min'
+            contains:
+              summary: Match any name containing
+              value: dmi%
+        - name: lastName
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/UserLastNameField'
+          examples:
+            exactMatch:
+              summary: Match last name excatly
+              value: admin
+            startsWith: 
+              summary: Match any name starting with
+              value: adm%
+            endsWith:
+              summary: Match any name ending with
+              value: '%min'
+            contains:
+              summary: Match any name containing
+              value: dmi%  
+        - name: role
+          in: query
+          description: User's role ID
+          required: false
+          schema:
+            type: string
+          example: 1624e83e-fc72-4e81-ad04-3396103b95ad
+        - name: email
+          in: query
+          description: User's email address
+          required: false
+          schema:
+            $ref: "#/components/schemas/EmailFields"
+        - name: phone
+          in: query
+          description: User's phone number
+          required: false
+          schema:
+            $ref: '#/components/schemas/PhoneFields'
+        - name: order
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/OrderFields'
+        - name: archived
+          in: query
+          description: User account status (active or archived)
+          required: false
+          schema:
+            $ref: "#/components/schemas/ArchivedFields"
+          examples:
+            active: 
+              summary: Active Account
+              value: false
+            archived:
+              summary: Archived Account
+              value: true
+      responses:
+        '200':
+          description: A list of users that the logged in user has access to
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+                  total:
+                    $ref: "#/components/schemas/Total"
+                  numPages:
+                    $ref: "#/components/schemas/NumPages"
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    post:
+      description: Create a user. The logged in user must be in the role solutions architect, sales, or admin to create the user account. Any other roles get denied
+      operationId: createUser
+      summary: Create a user.
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostUser"
+      responses:
+        '200':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /user/{id}:
+    get:
+      description: Get a user by its ID. The logged in user must be in role solutions architect, sales, or admin to find a user. Any other role gets denied
+      summary: Get a user
+      tags:
+        - User
+      parameters:
+        - name: id
+          in: path
+          description: The user UUID
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      responses:
+        '200':
+          description: The requested user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: error not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    put:
+      description: Update a user. The logged in user must be in role solutions architect, sales, or admin to update a user. Any other role gets denied
+      operationId: update user
+      summary: Update user data
+      tags:
+        - User
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutUser"
+      responses:
+        '200':
+          description: Successfully updated the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PutUser"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      description: Delete a user. The logged in user must be in role solutions architect, sales, or admin to delete (or archive) a user. Any other role gets denied
+      summary: Delete a user
+      tags:
+        - User
+      parameters:
+        - name: id
+          in: path
+          description: To delete user it will need UUID
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      responses:
+        "200":
+          description: Successfully deleted (archived) the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessUser"
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /user/resetpassword:
+    post:
+      description: Reset user's password
+      summary: Reset password
+      tags:
+        - User
+      parameters:
+        - name: email
+          in: query
+          description: The user's email
+          required: true
+          schema:
+            type: string
+        - name: password
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/UserPasswordField"
+        - name: token
+          in: query
+          description: The user's token
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: success message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResetpassword"
+        '404':
+          description: error resseting password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+  /user/forgotpassword:
+    post:
+      description: forgot a user's password
+      summary: Forgot password
+      tags:
+        - User
+      parameters:
+        - name: email
+          in: query
+          description: The user's email
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true 
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserErrorForgotPassword"
+      responses:
+        '404':
+          description: error resseting password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+  /user/whoami:
+    get:
+      summary: identifies the user
+      operationId: whoami
+      tags:
+        - User
+      responses:
+        '200':
+          description: Finds the logged in user's information summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+  /company:
+    get:
+      description: Get a list of all companies. A logged-in company must be in the role of a solutions architect, sales, or admin to receive the company list. Any other role gets denied
+      summary: List all companies
+      operationId: ListCompanies
+      tags:
+        - Company
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      responses:
+        '200':
+          description: A paged array of companies
+          content:
+            appliacation/json:
+              schema:
+                type: object
+                properties:
+                  company:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Company"
+                  total:
+                    $ref: "#/components/schemas/Total"
+                  numPages:
+                    $ref: "#/components/schemas/NumPages"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      description: Create a company only with sales, solutions architect roles
+      operationId: CreateCompany
+      summary: Create a company
+      tags:
+        - Company
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostCompany"
+      responses:
+       '201':
+        description: company created
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SuccessCompany"
+       '400':
+        description: invalid request
+        content:
+          application/json:
+            schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+       '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+       '500':
+        description: unexpected error
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+  /company/my: 
+    get:
+      description: Get a list of all companies. A logged-in company must be in the role of a solutions architect, sales, customer, solutions engineer or admin to receive the company list. Any other role gets denied
+      summary: List of companies the user is a part of
+      tags:
+        - Company
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      responses:
+        '200':
+          description: A paged array of companies
+          content:
+            appliacation/json:
+              schema:
+                  $ref: "#/components/schemas/Company"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /company/{id}:
+    get:
+      description: Get a list of all companies where the role of sales, solutions architect
+      summary: Get a company
+      tags:
+        - Company
+      parameters:
+        - name: id
+          in: path
+          description: The Company ID
+          required: true
+          schema:
+            type: string
+          example: 8aba095e-eb0d-410f-b1c1-371215fac0c3
+      responses:
+        '200':
+          description: A list of companies that the logged in user has access to
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: The requested company, not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      description: update a company data
+      operationId: update a company
+      summary: Update company data
+      tags:
+        - Company
+      parameters:
+        - name: id
+          in: path
+          description: The company id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  description: The company name
+                  type: string
+      responses:
+       '200':
+          description: updates the data of the company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PutCompany"
+       '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+       '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+       '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /company/{id}/activate:
+    put:
+      description: Activate a company account
+      summary: to activate the account it will need role as a sales and solutions architect
+      parameters:
+        - name: id
+          in: path
+          description: The company id
+          required: true
+          schema:
+            type: string
+      tags:
+        - Company
+      responses:
+       '200':
+        description: updates the data from archived
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutCompanyActivate"
+  /company/{id}/:
+    delete:
+      description: Delete a company. The logged in company must be in role solutions architect, sales, customer, solutions engineer or admin to delete (or archive) a company. Any other role gets denied
+      summary: Delete a company alows only for sales and solutions architect roles (archive)
+      parameters:
+        - name: id
+          in: path
+          description: To delete company it will need UUID
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Company
+      responses:
+        "200":
+          description: Successfully deleted (archived) the user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessCompany"
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error" 
+  /role:
+    get:
+      summary: List all roles
+      operationId: ListRoles
+      tags:
+        - Role
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      responses:
+        '200':
+          description: List of roles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  roles:
+                      $ref: "#/components/schemas/Roles"
+                  total:
+                    $ref: "#/components/schemas/Total"
+                  numPages:
+                    $ref: "#/components/schemas/NumPages"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        "500":
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - Role
+      operationId: createRole
+      summary: Creates a role (Admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostRole"
+      responses:
+        '201':
+          description: role created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessRole"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /role/{id}:
+    get:
+      summary: Get a role
+      tags:
+        - Role
+      parameters:
+        - name: id
+          in: path
+          description: The Role UUID
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      responses:
+        '200':
+          description: The requested role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Roles"
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Role
+      summary: used to update data of a role (Admin Only)
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostRole"
+
+      responses:
+        '200':
+          description: Successfully updated role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessRole"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Role
+      summary: Set an role to archived (Admin Only)
+
+      responses:
+        '200':
+          description: Successfully archived role
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessRole"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /role/{id}/activate:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Role
+      summary: used to unarchive a role (Admin Only)
+
+      responses:
+        '200':
+          description: Successfully unarchived (activated) industry vertical
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessRole"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+
+  /project:
+    get:
+      summary: List all projects
+      operationId: listProjects
+      tags:
+        - Project
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+        - name: title
+          in: query
+          description: Project Title
+          required: false
+          schema:
+            type: string
+        - name: archived
+          in: query
+          description: Get archived or unarchived projects
+          required: false
+          schema:
+            $ref: "#/components/schemas/ArchivedFields"
+        - name: useCase
+          in: query
+          description: array of ids of the use cases to search for
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              example: bc2760ec-dfb7-40df-a360-7ad0f87a5b3b
+        - name: order
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/OrderFields'
+
+              
+      responses:
+        '200':
+          description: A paged array of projects that the user has access to
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projects:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Project"
+                  total:
+                    $ref: "#/components/schemas/Total"
+                  numPages:
+                    $ref: "#/components/schemas/NumPages"
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - Project
+      operationId: createProject
+      summary: Creates a project.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostProject"
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessProject"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /project/{id}:
+    get:
+      tags:
+        - Project
+      parameters:
+        - name: id
+          in: path
+          schema:
+            $ref: '#/components/schemas/IdFields'
+          required: true
+      responses:
+        '200':
+          description: The requested project
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  project:
+                    type: object
+                    $ref: "#/components/schemas/Project"
+                
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Project
+      summary: used to update data of a project
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutProject"
+
+      responses:
+        '200':
+          description: Successfully updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessProject"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Project
+      summary: Set a project to archived
+
+      responses:
+        '200':
+          description: Successfully archived project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessProject"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /project/{id}/activate:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Project
+      summary: used to update data of a project
+
+      responses:
+        '200':
+          description: Successfully unarchived (activated) project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessProject"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /industry_vertical:
+    get:
+      summary: List all industry verticals
+      operationId: listIndustryVerticals
+      tags:
+        - Industry Vertical
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+        - name: name
+          in: query
+          description: Industry Vertical Name
+          required: false
+          schema:
+            type: string
+        - name: archived
+          in: query
+          description: Get archived or unarchived Industry Verticals
+          required: false
+          schema:
+            $ref: "#/components/schemas/ArchivedFields"
+        - name: order
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/OrderFields'
+
+              
+      responses:
+        '200':
+          description: A paged array of industry verticals that the user has access to
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  industryverticals:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/IndustryVertical"
+                  total:
+                    $ref: "#/components/schemas/Total"
+                  numPages:
+                    $ref: "#/components/schemas/NumPages"
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - Industry Vertical
+      operationId: createVertical
+      summary: Creates an industry vertical. (Admin Only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostIndustryVertical"
+      responses:
+        '201':
+          description: Industry vertical created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessIndustryVertical"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /industry_vertical/{id}:
+    get:
+      tags:
+        - Industry Vertical
+      summary: "Get a specific industry vertical"
+      parameters:
+        - name: id
+          in: path
+          schema:
+            $ref: '#/components/schemas/IdFields'
+          required: true
+      responses:
+        '200':
+          description: The requested industry vertical
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  industryvertical:
+                    $ref: "#/components/schemas/IndustryVertical"
+                
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Industry Vertical
+      summary: used to update data of a industry vertical (Admin Only)
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostIndustryVertical"
+
+      responses:
+        '200':
+          description: Successfully updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessIndustryVertical"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Industry Vertical
+      summary: Set an industry vertical to archived (Admin Only)
+
+      responses:
+        '200':
+          description: Successfully archived industry vertical
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessIndustryVertical"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /industry_vertical/{id}/activate:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Industry Vertical
+      summary: used to unarchive an industry vertical (Admin Only)
+
+      responses:
+        '200':
+          description: Successfully unarchived (activated) industry vertical
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessIndustryVertical"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /use_case:
+    get:
+      summary: List all use cases
+      operationId: listUseCases
+      tags:
+        - Use Case
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+        - name: name
+          in: query
+          description: Use Case Name
+          required: false
+          schema:
+            type: string
+        - name: archived
+          in: query
+          description: Get archived or unarchived Use Cases
+          required: false
+          schema:
+            $ref: "#/components/schemas/ArchivedFields"
+        - name: order
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/OrderFields'
+
+              
+      responses:
+        '200':
+          description: A paged array of use cases that the user has access to
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usecases:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/UseCase"
+                  total:
+                    $ref: "#/components/schemas/Total"
+                  numPages:
+                    $ref: "#/components/schemas/NumPages"
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    post:
+      tags:
+        - Use Case
+      operationId: createUseCase
+      summary: Creates a use case (Admin Only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostUseCase"
+      responses:
+        '201':
+          description: Use Case created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessUseCase"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:  
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /use_case/{id}:
+    get:
+      tags:
+        - Use Case
+      summary: "Get a specific use case"
+      parameters:
+        - name: id
+          in: path
+          schema:
+            $ref: '#/components/schemas/IdFields'
+          required: true
+      responses:
+        '200':
+          description: The requested use case
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usecase:
+                    $ref: "#/components/schemas/UseCase"
+                
+        '400':
+          description: Invalid Request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+            description: Unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/Error"
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Use Case
+      summary: used to update data of a use case (Admin Only)
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostUseCase"
+
+      responses:
+        '200':
+          description: Successfully updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessUseCase"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Use Case
+      summary: Set a use case to archived (Admin Only)
+
+      responses:
+        '200':
+          description: Successfully archived use case
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessUseCase"
+
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /use_case/{id}/activate:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Use Case
+      summary: used to update data of a use case (Admin Only)
+
+      responses:
+        '200':
+          description: Successfully unarchived (activated) use case
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessUseCase"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /marketingdocument:
+    get:
+      description: Gets a list of all marketing documents that was uploaded
+      summary: List all marketing
+      operationId: ListMarketing
+      tags:
+        - Marketing
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      responses:
+           '200':
+            description: A paged array of marketing
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    marketing:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/Marketing"
+                    total:
+                      $ref: "#/components/schemas/Total"
+                    numPages:
+                      $ref: "#/components/schemas/NumPages"
+           '401':
+              description: Unauthorized
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/NotAuthorized"
+           '404':
+              description: Not found
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/NotFound"
+           '500':
+              description: unexpected error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Error"
+    post:
+      description: Create marketing
+      operationId: createMarketing
+      summary: Create Marketing
+      tags:
+      - Marketing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostMarketing"
+      responses:
+        '201':
+          description: Marketing created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessMarketing"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /marketingdocument/{id}:
+    get:
+      description: Get a list of all marketing documents where the role of solutions architect or admin
+      summary: Get a marketing
+      tags:
+        - Marketing
+      parameters:
+        - name: id
+          in: path
+          dscription: The marketing ID
+          required: true
+          schema:
+            type: string
+          example: bfc6d3f4-e6a6-42fb-b7a6-44bc88bdcb17
+      responses:
+        '200':
+          description: A list of marketing that the logged in user has access to
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Marketing"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      description: updates the marketing document. The logged in user must be in role solutions architect
+      operationId: update marketing
+      summary: used to update data of a marketing document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Marketing
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutMarketing"
+      responses:
+        '200':
+          description: Successfully updated marketing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Marketing"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /marketingdocument/{id}/activate:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Marketing
+      summary: used to activate marketing document
+      responses:
+        '200':
+          description: Successfully unarchived (activated) marketing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Marketing"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Marketing
+      summary: marketing archived
+      responses:
+        '200':
+          description: Successfully archived marketing
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Marketing"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /referencedocument:
+    get:
+      description: Get a list of all reference documents. A logged-in reference must be in the role of a solutions architect or admin. Any other role gets denied.
+      summary: List all reference documents
+      operationId: ListReference
+      tags:
+        - Reference
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      responses:
+           '200':
+            description: A paged array of reference
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    reference:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/Reference"
+                    total:
+                      $ref: "#/components/schemas/Total"
+                    numPages:
+                      $ref: "#/components/schemas/NumPages"
+           '401':
+              description: Unauthorized
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/NotAuthorized"
+           '404':
+              description: Not Found
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/NotFound"
+           '500':
+              description: unexpected error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Error"
+    post:
+      description: Create reference
+      operationId: createReference
+      summary: Create Reference
+      tags:
+      - Reference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostReference"
+      responses:
+        '201':
+          description: Reference created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessReference"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /referencedocument/{id}:
+    get:
+      description: Get a list of all reference documents where the role of solutions architect or admin
+      summary: Get a reference
+      tags:
+        - Reference
+      parameters:
+        - name: id
+          in: path
+          dscription: The reference Id
+          required: true
+          schema:
+            type: string
+          example: bfc6d3f4-e6a6-42fb-b7a6-44bc88bdcb17
+      responses:
+        '200':
+          description: A list of reference that the logged in user has access to
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      description: updates the reference document. The logged in user must be in role solutions architect
+      operationId: update reference
+      summary: used to update data of a reference document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Reference
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutReference"
+      responses:
+        '200':
+          description: Successfully updated reference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /referencedocument/{id}/activate:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Reference
+      summary: used to activate reference document
+      responses:
+        '200':
+          description: Successfully unarchived (activated) reference
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Reference
+      summary: Reference archived
+      responses:
+        '200':
+          description: Successfully archived refererence
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Reference"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /customerdocument:
+    get:
+      description: Get a list of all customer documents. A logged-in customer must be in the role of a solutions architect or admin. Any other role gets denied.
+      summary: List all customer documents
+      operationId: ListCustomer
+      tags:
+        - Customer
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      responses:
+           '200':
+            description: A paged array of customer
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    customer:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/Customer"
+                    total:
+                      $ref: "#/components/schemas/Total"
+                    numPages:
+                      $ref: "#/components/schemas/NumPages"
+           '401':
+              description: Unauthorized
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/NotAuthorized"
+           '404':
+              description: Not Found
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/NotFound"
+           '500':
+              description: unexpected error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Error"
+    post:
+      description: Create customer
+      operationId: createCustomer
+      summary: Create Customer
+      tags:
+      - Customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostCustomer"
+      responses:
+        '201':
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessCustomer"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /customerdocument/{id}:
+    get:
+      description: Get a list of all customer documents where the role of solutions architect or admin
+      summary: Get a customer
+      tags:
+        - Customer
+      parameters:
+        - name: id
+          in: path
+          dscription: The customer Id
+          required: true
+          schema:
+            type: string
+          example: bfc6d3f4-e6a6-42fb-b7a6-44bc88bdcb17
+      responses:
+        '200':
+          description: A list of customer that the logged in user has access to
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      description: updates the customer document. The logged in user must be in role solutions architect
+      operationId: update customer
+      summary: used to update data of a customer document
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Customer
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutCustomer"
+      responses:
+        '200':
+          description: Successfully updated customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /customerdocument/{id}/activate:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Customer
+      summary: used to activate customer document
+      responses:
+        '200':
+          description: Successfully unarchived (activated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Customer
+      summary: archived
+      responses:
+        '200':
+          description: Successfully archived customer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /Icon:
+    get:
+      description: Get a list of all icons.
+      summary: List all Icons
+      operationId: ListIcons
+      tags:
+        - Icon
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Limit"
+        - name: page
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/Page"
+      responses:
+           '200':
+            description: A paged array of Icon
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    icon:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/Icon"
+                    total:
+                      $ref: "#/components/schemas/Total"
+                    numPages:
+                      $ref: "#/components/schemas/NumPages"
+           '401':
+              description: Unauthorized
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/NotAuthorized"
+           '404':
+              description: Not Found
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/NotFound"
+           '500':
+              description: unexpected error
+              content:
+                application/json:
+                  schema:
+                    $ref: "#/components/schemas/Error"
+    post:
+      description: Create Icon
+      operationId: createIcon
+      summary: Create Icon
+      tags:
+      - Icon
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostIcon"
+      responses:
+        '201':
+          description: Icon created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessIcon"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: An error occurred
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /Icon/{id}:
+    get:
+      description: Get a list of all Icons where the role of solutions architect or admin
+      summary: Get an Icon
+      tags:
+        - Icon
+      parameters:
+        - name: id
+          in: path
+          dscription: The Icon Id
+          required: true
+          schema:
+            type: string
+          example: 1a7bca18-75f0-4c29-b82b-9d92bb778007
+      responses:
+        '200':
+          description: A list of Icon that the logged in user has access to
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Icon"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      description: updates the Icon. The logged in user must be in role solutions architect
+      operationId: update Icon
+      summary: used to update data of an Icon
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Icon
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutIcon"
+      responses:
+        '200':
+          description: Successfully updated Icon
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Icon"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /Icon/{id}/activate:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Icon
+      summary: used to activate icon
+      responses:
+        '200':
+          description: Successfully unarchived (activated)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Icon"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/IdFields'
+      tags:
+        - Icon
+      summary: Icon archived
+      responses:
+        '200':
+          description: Successfully archived icon
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Icon"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InvalidRequest"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotFound"
+        '500':
+          description: error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  $ref: '#/components/schemas/UsernameField'
+                password:
+                  $ref: "#/components/schemas/UserPasswordField"
+      responses:
+        '200':
+          description: Succesfully logged in
+          content:
+            application/json:
+              schema:
+                properties:
+                  status: 
+                    type: string
+                    example: "Logged in"
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: logout
+      responses:
+        '200':
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: Logged out
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NotAuthorized"
+
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+
+  schemas:
+    Total:
+      type: number
+      description: total number of records
+
+    NumPages:
+      type: number
+      description: total number of pages given the limit
+
+    Limit:
+      type: number
+      description: Total number of records per page (max 100)
+    
+    Page:
+      description: Which page to start on (relative to limit)
+      type: integer
+      format: int32
+
+    PhoneFields:
+      type: string
+      description: User's phone number
+      maxLength: 20
+      pattern: '/^\s*(?:\+?(\d{1,3}))?[-. (]*(\d{3})[-. )]*(\d{3})[-. ]*(\d{4})(?: *x(\d+))?\s*$/'
+      example: 1-555-555-5555
+
+    EmailFields:
+      type: string
+      description: User's email address
+      pattern: /^\w+([.-]?\w+)+([+]?(\d|\w))*@\w+([.-]?\w+)*(\.\w{2,3})+$/
+      example: 'admin@pdxmodeler.com'
+
+    OrderFields:
+      description: Fields (i.e. archived) followed by their sort order (ASC/DESC)
+      type: array
+      items:
+        type: array
+        items: 
+          type: string
+      example: [['archived', 'DESC']]
+
+    UserFirstNameField:
+      type: string
+      description: First Name of the User
+
+    UserLastNameField:
+      type: string
+      description: Last Name of the User
+
+    CompanyNameField:
+      type: string
+      description: name of the company
+
+    UsernameField:
+      type: string
+      maxLength: 60
+      description: user's username (for login)
+  
+    UserRoleField:
+      type: string
+      description: User's role ID
+      example: b0d0ab14-4069-48df-9258-86647a0d7d95
+
+    UserPasswordField:
+      type: string
+      maxLength: 60
+      description: Password for user
+
+    TokenField:
+      type: string
+      description: contains error message (error resetting password)
+
+
+    Company:
+      required:
+        - name
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        name:
+          $ref: '#/components/schemas/CompanyNameField'
+        createdBy:
+          $ref: '#/components/schemas/CreatedBy'
+
+    Roles:
+      required:
+        - id
+        - name
+        - archived
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        name:
+          type: string
+          description: name of the role
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+
+    User:
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - phone
+        - username
+        - role
+        - archived
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        firstName:
+          $ref: '#/components/schemas/UserFirstNameField'
+        lastName:
+          $ref: '#/components/schemas/UserLastNameField'
+        email:
+          $ref: "#/components/schemas/EmailFields"
+        phone:
+          $ref: "#/components/schemas/PhoneFields"
+        username:
+          $ref: '#/components/schemas/UsernameField'
+        role:
+          $ref: '#/components/schemas/UserRoleField'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+
+    PostUser:
+      required:
+        - firstName
+        - lastName
+        - email
+        - phone
+        - username
+        - role
+        - archived
+        - password
+      properties:
+        firstName:
+          $ref: '#/components/schemas/UserFirstNameField'
+        lastName:
+          $ref: '#/components/schemas/UserLastNameField'
+        email:
+          email:
+          $ref: "#/components/schemas/EmailFields"
+        phone:
+          $ref: "#/components/schemas/PhoneFields"
+        username:
+          $ref: '#/components/schemas/UsernameField'
+        password:
+          $ref: "#/components/schemas/UserPasswordField"
+        role:
+          $ref: '#/components/schemas/UserRoleField'
+
+    PutUser:
+      properties:
+        firstName:
+          $ref: '#/components/schemas/UserFirstNameField'
+        lastName:
+          $ref: '#/components/schemas/UserLastNameField'
+        email:
+          email:
+          $ref: "#/components/schemas/EmailFields"
+        phone:
+          $ref: "#/components/schemas/PhoneFields"
+        username:
+          $ref: '#/components/schemas/UsernameField'
+        role:
+          $ref: '#/components/schemas/UserRoleField'
+
+    SuccessUser:
+      required:
+        - user
+      properties:
+        user:
+          type: array
+          $ref: "#/components/schemas/User"
+          description: Contains the user that was successfully created/updated
+
+    SuccessCompany:
+      required:
+        - company
+      properties:
+        company:
+          type: string
+          description: Contains the success message
+
+    Role:
+      required:
+        - id
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+          
+    InvalidRequest:
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Contains a message detailing why the request was invalid
+
+    Error:
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: contains a message about the failure
+
+    UserErrorResetPassword:
+      required:
+        - error
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailFields"
+        password:
+          $ref: "#/components/schemas/UserPasswordField"
+        token:
+          $ref: "#/components/schemas/TokenField"
+
+    UserErrorForgotPassword:
+      required:
+        - error
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailFields"
+
+    SuccessResetpassword:
+      required:
+        - error
+      properties:
+        email:
+          $ref: "#/components/schemas/EmailFields"
+        password:
+          $ref: "#/components/schemas/UserPasswordField"
+        token:
+          $ref: "#/components/schemas/TokenField"
+      description: Contains the user password was successfully reset
+
+    PutCompany:
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        name:
+          $ref: "#/components/schemas/CompanyNameField"
+    
+    PutCompanyActivate:
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+
+    PostCompany:
+      required:
+        - name
+      properties:
+        name:
+          $ref: "#/components/schemas/CompanyNameField"
+
+    ProjectTitle:
+      type: string
+      description: Title of the project
+      example: My Project title
+
+    ProjectCompanyId:
+      type: string
+      description: Id for the parent company
+      example: b0d0ab14-4069-48df-9258-86647a0d7d95
+
+    ProjectUseCases:
+      type: array
+      description: Use case ids for the project
+      items:
+        type: string
+        example: b0d0ab14-4069-48df-9258-86647a0d7d95
+
+    CreatedBy:
+      type: string
+      description: id for creating user
+      example: b0d0ab14-4069-48df-9258-86647a0d7d95
+
+    IdFields:
+      type: string
+      description: Object id (UUID)
+      example: b0d0ab14-4069-48df-9258-86647a0d7d95
+
+    ProjectId:
+      type: string
+      description: Object id (UUID)
+      example: 8be38654-fa21-42ca-a4c2-4674aabe1f28
+
+    ArchivedFields:
+      type: boolean
+      description: Whether or not this is archived
+      example: false
+
+    AssociatedUserFields:
+      type: array
+      description: Array of ids for associated users
+      items:
+        $ref: '#/components/schemas/IdFields'
+
+    CreatedAtFields:
+      type: string
+      description: date the record was created
+      example: '2022-09-16T13:00:00.000Z'
+    
+    UpdatedAtFields:
+      type: string
+      description: date the record was updated
+      example: '2022-09-16T14:00:00.000Z'
+
+    
+    IndustryVerticalName:
+      type: string
+      description: Industry Vertical name
+      example: Aritificial Intelligence
+
+    RoleName:
+      type: string
+      description: Role name
+      example: admin
+
+    UseCaseName:
+      type: string
+      description: Industry Vertical name
+      example: Aritificial Intelligence
+
+    Project:
+      required:
+        - id
+        - title
+        - useCases
+        - companyId
+        - createdBy
+        - archived
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        title:
+          $ref: '#/components/schemas/ProjectTitle'
+        useCases:
+          $ref: '#/components/schemas/ProjectUseCases'
+        companyId:
+          $ref: '#/components/schemas/ProjectCompanyId'
+        createdBy:
+          $ref: '#/components/schemas/CreatedBy'
+        fullCreatedBy:
+          $ref: "#/components/schemas/User"
+          description: Contains the user that created the project
+        company:
+          $ref: "#/components/schemas/Company"
+          description: Contains the parent company
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        associatedUsers:
+          $ref: '#/components/schemas/AssociatedUserFields'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAtFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+
+    PostProject:
+      required:
+        - title
+        - companyId
+      properties:
+        title:
+          $ref: '#/components/schemas/ProjectTitle'
+        useCases:
+          $ref: '#/components/schemas/ProjectUseCases'
+        companyId:
+          $ref: '#/components/schemas/ProjectCompanyId'
+        associatedUsers:
+          $ref: '#/components/schemas/AssociatedUserFields'
+        
+    PutProject:
+      properties:
+        title:
+          $ref: '#/components/schemas/ProjectTitle'
+        useCases:
+          $ref: '#/components/schemas/ProjectUseCases'
+        companyId:
+          $ref: '#/components/schemas/ProjectCompanyId'
+        associatedUsers:
+          $ref: '#/components/schemas/AssociatedUserFields'
+
+    SuccessProject:
+      required:
+        - project
+      properties:
+        project:
+          type: object
+          description: Contains the project that was successfully created/updated
+          required:
+            - id
+            - title
+            - useCases
+            - companyId
+            - createdBy
+            - archived
+          properties:
+            id:
+              $ref: '#/components/schemas/IdFields'
+            title:
+              $ref: '#/components/schemas/ProjectTitle'
+            useCases:
+              $ref: '#/components/schemas/ProjectUseCases'
+            companyId:
+              $ref: '#/components/schemas/ProjectCompanyId'
+            createdBy:
+              $ref: '#/components/schemas/CreatedBy'
+            archived:
+              $ref: '#/components/schemas/ArchivedFields'
+            associatedUsers:
+              $ref: '#/components/schemas/AssociatedUserFields'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAtFields'
+            updatedAt:
+              $ref: '#/components/schemas/UpdatedAtFields'
+
+    UseCase:
+      required:
+        - id
+        - name
+        - createdBy
+        - archived
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        name:
+          $ref: '#/components/schemas/UseCaseName'
+        createdBy:
+          $ref: '#/components/schemas/CreatedBy'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAtFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+
+    PostUseCase:
+      required:
+        - name
+      properties:
+        name:
+          $ref: '#/components/schemas/UseCaseName'
+
+    SuccessUseCase:
+      required:
+        - industryvertical
+      properties:
+        industryvertical:
+          type: object
+          description: Contains the industry vertical that was successfully created/updated
+          required:
+            - id
+            - name
+            - createdBy
+            - archived
+          properties:
+            id:
+              $ref: '#/components/schemas/IdFields'
+            name:
+              $ref: '#/components/schemas/UseCaseName'
+            createdBy:
+              $ref: '#/components/schemas/CreatedBy'
+            archived:
+              $ref: '#/components/schemas/ArchivedFields'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAtFields'
+            updatedAt:
+              $ref: '#/components/schemas/UpdatedAtFields'
+    
+    IndustryVertical:
+      required:
+        - id
+        - name
+        - createdBy
+        - archived
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        name:
+          $ref: '#/components/schemas/IndustryVerticalName'
+        createdBy:
+          $ref: '#/components/schemas/CreatedBy'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAtFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+
+    PostIndustryVertical:
+      required:
+        - name
+      properties:
+        name:
+          $ref: '#/components/schemas/IndustryVerticalName'
+
+    PostRole:
+      required:
+        - name
+      properties:
+        name:
+          $ref: '#/components/schemas/RoleName'
+
+    SuccessIndustryVertical:
+      required:
+        - industryvertical
+      properties:
+        industryvertical:
+          type: object
+          description: Contains the industry vertical that was successfully created/updated
+          required:
+            - id
+            - name
+            - createdBy
+            - archived
+          properties:
+            id:
+              $ref: '#/components/schemas/IdFields'
+            name:
+              $ref: '#/components/schemas/IndustryVerticalName'
+            createdBy:
+              $ref: '#/components/schemas/CreatedBy'
+            archived:
+              $ref: '#/components/schemas/ArchivedFields'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAtFields'
+            updatedAt:
+              $ref: '#/components/schemas/UpdatedAtFields'
+
+    SuccessRole:
+      required:
+        - role
+      properties:
+        role:
+          type: object
+          description: Contains the role that was successfully created/updated
+          required:
+            - id
+            - name
+            - createdBy
+            - archived
+          properties:
+            id:
+              $ref: '#/components/schemas/IdFields'
+            name:
+              $ref: '#/components/schemas/RoleName'
+            createdBy:
+              $ref: '#/components/schemas/CreatedBy'
+            archived:
+              $ref: '#/components/schemas/ArchivedFields'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAtFields'
+            updatedAt:
+              $ref: '#/components/schemas/UpdatedAtFields'
+
+    Marketing:
+      required:
+        - id
+        - docName
+        - createdBy
+        - archived
+        - updatedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        docName:
+          $ref: '#/components/schemas/MarketingNameFields'
+        createdBy:
+          $ref: '#/components/schemas/CreatedAtFields'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+
+    PostMarketing:
+      required:
+        - docName
+      properties:
+        docName:
+          $ref: '#/components/schemas/MarketingNameFields'
+    
+    PutMarketing:
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        industryVertical:
+          $ref: '#/components/schemas/MarketingIndustryVerticalField'
+        useCase:
+          $ref: '#/components/schemas/MarketingUseCaseField'
+        docType:
+          $ref: '#/components/schemas/MarketingDocTypeField'
+        docName:
+          $ref: '#/components/schemas/MarketingNameFields'
+        originalFilename:
+          $ref: '#/components/schemas/MarketingOriginalFileNameField'
+        createdBy:
+          $ref: '#/components/schemas/CreatedBy'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAtFields'
+        storageLocation:
+          $ref: '#/components/schemas/MarketingStorageLocationField'
+        notes:
+          $ref: '#/components/schemas/MarketingNotesField'
+        types:
+          $ref: '#/components/schemas/MarketingTypesField'
+        partners:
+          $ref: '#/components/schemas/MarketingPartnersField'
+        technologies:
+          $ref: '#/components/schemas/MarketingTechnologiesField'
+        projectId:
+          $ref: '#/components/schemas/MarketingProjectIdField'
+    
+    SuccessMarketing:
+      required:
+        - docName
+      properties:
+        docName:
+          type: object
+          description: Contains the success message
+          required:
+            - id
+            - industryVertical
+            - useCase
+            - docType
+            - docName
+            - originalFilename
+            - createdBy
+            - archived
+            - updatedAt
+            - createdAt
+            - storageLocation
+            - notes
+            - types
+            - partners
+            - technologies
+            - projectId
+          properties:
+            id:
+              $ref: '#/components/schemas/IdFields'
+            industryVertical:
+              $ref: '#/components/schemas/MarketingIndustryVerticalField'
+            useCase:
+              $ref: '#/components/schemas/MarketingUseCaseField'
+            docType:
+              $ref: '#/components/schemas/MarketingDocTypeField'
+            docName:
+              $ref: '#/components/schemas/MarketingNameFields'
+            originalFilename:
+              $ref: '#/components/schemas/MarketingOriginalFileNameField'
+            createdBy:
+              $ref: '#/components/schemas/CreatedBy'
+            archived:
+              $ref: '#/components/schemas/ArchivedFields'
+            updatedAt:
+              $ref: '#/components/schemas/UpdatedAtFields'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAtFields'
+            storageLocation:
+              $ref: '#/components/schemas/MarketingStorageLocationField'
+            notes:
+              $ref: '#/components/schemas/MarketingNotesField'
+            types:
+              $ref: '#/components/schemas/MarketingTypesField'
+            partners:
+              $ref: '#/components/schemas/MarketingPartnersField'
+            technologies:
+              $ref: '#/components/schemas/MarketingTechnologiesField'
+            projectId:
+              $ref: '#/components/schemas/MarketingProjectIdField'
+
+    MarketingNameFields:
+      type: string
+      description: marketing name field
+      example: example emessage
+
+    MarketingIndustryVerticalField:
+      type: string
+      description: Industry Vertical name
+
+    MarketingUseCaseField:
+      type: string
+      description: Industry Vertical name
+      example: Aritificial Intelligence
+
+    MarketingDocTypeField:
+      type: string
+      description: document type name
+      example: PDF
+
+    MarketingNameTypeField:
+      type: string
+      description: document name type
+      example: document name
+
+    MarketingOriginalFileNameField:
+      type: string
+      description: original file name
+      example: original document name
+
+    MarketingStorageLocationField:
+      type: string
+      description: storage location of the file
+      example: storage
+
+    MarketingNotesField:
+      type: string
+      description: Notes name
+      example: Add Notes
+
+    MarketingTypesField:
+      type: string
+      description: File type name
+      example: example message
+
+    MarketingPartnersField:
+      type: string
+      description: Add Partner name
+      example: test partner
+
+    MarketingTechnologiesField:
+      type: string
+      description: Technology type name
+      example: test tech
+
+    MarketingProjectIdField:
+      type: string
+      description: ProjectId field
+      example: 8be38654-fa21-42ca-a4c2-4674aabe1f28
+
+    Reference:
+      required:
+        - id
+        - docName
+        - createdBy
+        - archived
+        - updatedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        docName:
+          $ref: '#/components/schemas/ReferenceDocNameField'
+        createdBy:
+          $ref: '#/components/schemas/CreatedAtFields'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+
+    PostReference:
+      required:
+        - docName
+      properties:
+        docName:
+          $ref: '#/components/schemas/ReferenceDocNameField'
+
+    PutReference:
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        industryVertical:
+          $ref: '#/components/schemas/ReferenceIndustryVerticalField'
+        useCase:
+          $ref: '#/components/schemas/ReferenceUseCaseField'
+        notes:
+          $ref: '#/components/schemas/ReferenceNotesField'
+        docName:
+          $ref: '#/components/schemas/ReferenceDocNameField'
+        types:
+          $ref: '#/components/schemas/ReferenceTypesField'
+        partners:
+          $ref: '#/components/schemas/ReferencePartnersField'
+        technologies:
+          $ref: '#/components/schemas/ReferenceTechnologiesField'
+
+    SuccessReference:
+      required:
+        - docName
+      properties:
+        docName:
+          type: object
+          description: Contains the success message
+          required:
+            - id
+            - industryVertical
+            - useCase
+            - docType
+            - docName
+            - originalFilename
+            - createdBy
+            - archived
+            - updatedAt
+            - createdAt
+            - storageLocation
+            - notes
+            - types
+            - partners
+            - technologies
+            - projectId
+          properties:
+            id:
+              $ref: '#/components/schemas/IdFields'
+            industryVertical:
+              $ref: '#/components/schemas/ReferenceIndustryVerticalField'
+            useCase:
+              $ref: '#/components/schemas/ReferenceUseCaseField'
+            docType:
+              $ref: '#/components/schemas/ReferenceDocTypeField'
+            docName:
+              $ref: '#/components/schemas/ReferenceDocNameField'
+            originalFilename:
+              $ref: '#/components/schemas/ReferenceOriginalFileNameField'
+            createdBy:
+              $ref: '#/components/schemas/CreatedBy'
+            archived:
+              $ref: '#/components/schemas/ArchivedFields'
+            updatedAt:
+              $ref: '#/components/schemas/UpdatedAtFields'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAtFields'
+            storageLocation:
+              $ref: '#/components/schemas/ReferenceStorageLocationField'
+            notes:
+              $ref: '#/components/schemas/ReferenceNotesField'
+            types:
+              $ref: '#/components/schemas/ReferenceTypesField'
+            partners:
+              $ref: '#/components/schemas/ReferencePartnersField'
+            technologies:
+              $ref: '#/components/schemas/ReferenceTechnologiesField'
+            projectId:
+              $ref: '#/components/schemas/ReferenceProjectIdField'
+
+    ReferenceIndustryVerticalField:
+      type: string
+      description: Industry Vertical name
+
+    ReferenceUseCaseField:
+      type: string
+      description: Industry Vertical name
+      example: Aritificial Intelligence
+
+    ReferenceDocTypeField:
+      type: string
+      description: document type name
+      example: PDF
+
+    ReferenceNameTypeField:
+      type: string
+      description: document name type
+      example: document name
+
+    ReferenceOriginalFileNameField:
+      type: string
+      description: original file name
+      example: original document name
+
+    ReferenceStorageLocationField:
+      type: string
+      description: storage location of the file
+      example: storage
+
+    ReferenceNotesField:
+      type: string
+      description: Notes name
+      example: Add Notes
+
+    ReferenceTypesField:
+      type: string
+      description: File type name
+      example: example message
+
+    ReferencePartnersField:
+      type: string
+      description: Add Partner name
+      example: test partner
+
+    ReferenceTechnologiesField:
+      type: string
+      description: Technology type name
+      example: test tech
+
+    ReferenceProjectIdField:
+      type: string
+      description: ProjectId field
+      example: 8be38654-fa21-42ca-a4c2-4674aabe1f28
+
+    ReferenceDocNameField:
+      type: string
+      description: reference name field
+      example: example emessage
+
+    Customer:
+      required:
+        - Id
+        - docName
+        - createdBy
+        - archived
+        - updatedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        docName:
+          $ref: '#/components/schemas/CustomerDocNameField'
+        createdBy:
+          $ref: '#/components/schemas/CreatedAtFields'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+
+    PostCustomer:
+      required:
+        - docName
+        - projectId
+      properties:
+        docName:
+          $ref: '#/components/schemas/CustomerDocNameField'
+        projectId:
+          $ref: '#/components/schemas/CustomerProjectIdField'
+
+    PutCustomer:
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        industryVertical:
+          $ref: '#/components/schemas/CustomerIndustryVerticalField'
+        useCase:
+          $ref: '#/components/schemas/CustomerUseCaseField'
+        docType:
+          $ref: '#/components/schemas/CustomerDocTypeField'
+        docName:
+          $ref: '#/components/schemas/CustomerDocNameField'
+        originalFilename:
+          $ref: '#/components/schemas/CustomerOriginalFileNameField'
+        createdBy:
+          $ref: '#/components/schemas/CreatedBy'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAtFields'
+        storageLocation:
+          $ref: '#/components/schemas/CustomerStorageLocationField'
+        notes:
+          $ref: '#/components/schemas/CustomerNotesField'
+        types:
+          $ref: '#/components/schemas/CustomerTypesField'
+        partners:
+          $ref: '#/components/schemas/CustomerPartnersField'
+        technologies:
+          $ref: '#/components/schemas/CustomerTechnologiesField'
+        projectId:
+          $ref: '#/components/schemas/CustomerProjectIdField'
+
+    SuccessCustomer:
+      required:
+        - docName
+      properties:
+        docName:
+          type: object
+          description: Contains the success message
+          required:
+            - id
+            - industryVertical
+            - useCase
+            - docType
+            - docName
+            - originalFilename
+            - createdBy
+            - archived
+            - updatedAt
+            - createdAt
+            - storageLocation
+            - notes
+            - types
+            - partners
+            - technologies
+            - projectId
+          properties:
+            id:
+              $ref: '#/components/schemas/IdFields'
+            industryVertical:
+              $ref: '#/components/schemas/CustomerIndustryVerticalField'
+            useCase:
+              $ref: '#/components/schemas/CustomerUseCaseField'
+            docType:
+              $ref: '#/components/schemas/CustomerDocTypeField'
+            docName:
+              $ref: '#/components/schemas/CustomerDocNameField'
+            originalFilename:
+              $ref: '#/components/schemas/CustomerOriginalFileNameField'
+            createdBy:
+              $ref: '#/components/schemas/CreatedBy'
+            archived:
+              $ref: '#/components/schemas/ArchivedFields'
+            updatedAt:
+              $ref: '#/components/schemas/UpdatedAtFields'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAtFields'
+            storageLocation:
+              $ref: '#/components/schemas/CustomerStorageLocationField'
+            notes:
+              $ref: '#/components/schemas/CustomerNotesField'
+            types:
+              $ref: '#/components/schemas/CustomerTypesField'
+            partners:
+              $ref: '#/components/schemas/CustomerPartnersField'
+            technologies:
+              $ref: '#/components/schemas/CustomerTechnologiesField'
+            projectId:
+              $ref: '#/components/schemas/CustomerProjectIdField'
+
+    CustomerIndustryVerticalField:
+      type: string
+      description: Industry Vertical name
+
+    CustomerUseCaseField:
+      type: string
+      description: Industry Vertical name
+      example: Aritificial Intelligence
+
+    CustomerDocTypeField:
+      type: string
+      description: document type name
+      example: PDF
+
+    CustomerNameTypeField:
+      type: string
+      description: document name type
+      example: document name
+
+    CustomerOriginalFileNameField:
+      type: string
+      description: original file name
+      example: original document name
+
+    CustomerStorageLocationField:
+      type: string
+      description: storage location of the file
+      example: storage
+
+    CustomerNotesField:
+      type: string
+      description: Notes name
+      example: Add Notes
+
+    CustomerTypesField:
+      type: string
+      description: File type name
+      example: example message
+
+    CustomerPartnersField:
+      type: string
+      description: Add Partner name
+      example: test partner
+
+    CustomerTechnologiesField:
+      type: string
+      description: Technology type name
+      example: test tech
+
+    CustomerProjectIdField:
+      type: string
+      description: ProjectId field
+      example: 8be38654-fa21-42ca-a4c2-4674aabe1f28
+
+    CustomerDocNameField:
+      type: string
+      description: customer document name field
+      example: example message
+
+    Icon:
+      required:
+        - Id
+        - iconName
+        - createdBy
+        - archived
+        - updatedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        iconName:
+          $ref: '#/components/schemas/IconNameField'
+        createdBy:
+          $ref: '#/components/schemas/CreatedAtFields'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+
+    PostIcon:
+      required:
+        - iconName
+      properties:
+        iconName:
+          $ref: '#/components/schemas/IconNameField'
+
+    PutIcon:
+      properties:
+        id:
+          $ref: '#/components/schemas/IdFields'
+        industryVertical:
+          $ref: '#/components/schemas/IconIndustryVerticalField'
+        useCase:
+          $ref: '#/components/schemas/IconUseCaseField'
+        notes:
+          $ref: '#/components/schemas/IconNotesField'
+        docName:
+          $ref: '#/components/schemas/IconNameField'
+        types:
+          $ref: '#/components/schemas/IconOriginalFileNameField'
+        createdBy:
+          $ref: '#/components/schemas/CreatedBy'
+        archived:
+          $ref: '#/components/schemas/ArchivedFields'
+        updatedAt:
+          $ref: '#/components/schemas/UpdatedAtFields'
+        createdAt:
+          $ref: '#/components/schemas/CreatedAtFields'
+        storageLocation:
+          $ref: '#/components/schemas/IconStorageLocationField'
+
+    IconIndustryVerticalField:
+      type: string
+      description: Industry Vertical name
+      example: Aritificial Intelligence
+
+    IconUseCaseField:
+      type: string
+      description: Industry Vertical name
+      example: Aritificial Intelligence
+
+    IconNameField:
+      type: string
+      description: Icon Name 
+      example: Add name
+
+    IconNotesField:
+      type: string
+      description: Notes name
+      example: Add Notes
+
+    IconOriginalFileNameField:
+      type: string
+      description:
+      example: example message
+
+    IconStorageLocationField:
+      type: string
+      description: Icon storage location name
+      example: example emessage
+
+    SuccessIcon:
+      required:
+        - iconName
+      properties:
+        docName:
+          type: object
+          description: Contains the success message
+          required:
+            - id
+            - industryVertical
+            - useCase
+            - iconName
+            - originalFilename
+            - createdBy
+            - archived
+            - updatedAt
+            - createdAt
+            - storageLocation
+            - notes
+          properties:
+            id:
+              $ref: '#/components/schemas/IdFields'
+            industryVertical:
+              $ref: '#/components/schemas/IconIndustryVerticalField'
+            useCase:
+              $ref: '#/components/schemas/IconUseCaseField'
+            iconName:
+              $ref: '#/components/schemas/IconNameField'
+            originalFilename:
+              $ref: '#/components/schemas/IconOriginalFileNameField'
+            createdBy:
+              $ref: '#/components/schemas/CreatedBy'
+            archived:
+              $ref: '#/components/schemas/ArchivedFields'
+            updatedAt:
+              $ref: '#/components/schemas/UpdatedAtFields'
+            createdAt:
+              $ref: '#/components/schemas/CreatedAtFields'
+            storageLocation:
+              $ref: '#/components/schemas/IconStorageLocationField'
+            notes:
+              $ref: '#/components/schemas/IconNotesField'
+
+    NotFound:
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Not Found"
+    
+    NotAuthorized:
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: "Not Authorized"

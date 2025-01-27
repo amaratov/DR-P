@@ -1,0 +1,43 @@
+{
+    "env": {
+        "browser": true,
+        "es2021": true,
+        "jest": true
+    },
+    "extends": [
+        "react-app",
+        "react-app/jest",
+        "airbnb",
+        "plugin:prettier/recommended"
+    ],
+    "parserOptions": {
+        "ecmaFeatures": {
+            "jsx": true
+        },
+        "ecmaVersion": "latest",
+        "sourceType": "module"
+    },
+    // put prettier at the end of array so it is able to overwrite previous
+    "plugins": [
+        "react",
+        "prettier"
+    ],
+    "rules": {
+        "quotes": ["error", "single"],
+        "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+        "react/jsx-props-no-spreading": "off",
+        "no-unused-vars": "warn",
+        "jsx-a11y/no-static-element-interactions": "off",
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": true}],
+        "no-shadow": "off",
+        "default-param-last": 0,
+        "import/prefer-default-export": "off",
+        "class-methods-use-this": "off",
+        "no-param-reassign": 0,
+        "jsx-a11y/anchor-is-valid": "warn",
+        "react/prop-types": 0,
+        "spaced-comment": "off",
+        "import/no-webpack-loader-syntax": "off",
+        "import/no-unresolved": "off"
+    }
+}

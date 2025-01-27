@@ -1,0 +1,52 @@
+html {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#root {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  overflow: auto;
+}
+
+.pdf-viewer-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1235;
+  background-color: rgba(105, 105, 105, 0.9);
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.boldTextDarkColor {
+  font-weight: 800;
+  color: black !important;
+}
+
+button.Mui-selected {
+  color: var(--color-batman);
+}
+
+tbody.MuiTableBody-root {
+  border-bottom: unset !important;
+}
+
+button {
+  font-family: 'Inter', sans-serif !important;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+}

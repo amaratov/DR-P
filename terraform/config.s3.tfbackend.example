@@ -1,0 +1,3 @@
+bucket="bucketName"
+key="tfstatePathHere"
+region="us-west-2"

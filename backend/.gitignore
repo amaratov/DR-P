@@ -1,0 +1,12 @@
+node_modules
+config/development.json
+config/test.json
+config/production.json
+.idea/
+.DS_Store/
+dist/**
+.nyc_output
+coverage
+**.DS_Store
+minioFiles
+files

@@ -1,0 +1,46 @@
+{
+    "logLevel": "debug",
+    "sessionSecret": "CHANGE_ME",
+    "applicationName": "PDx Modeler",
+    "jwtSecret": "CHANGE_ME",
+    "mapToken": "mapboxAPIToken",
+
+    "mvtUrl": "http://mvturlHere",
+    "mvtToken": "mvtToken",
+
+    "database": {
+        "host": "127.0.0.1:5432",
+        "user": "user",
+        "password": "pass",
+        "dbname": "dbname"
+    },
+
+    "initialAdmin": {
+        "firstName": "Admin",
+        "lastName": "Admin",
+        "email": "admin@dgr.com",
+        "phone": "1-555-555-5555",
+        "password": "admin",
+        "role": "admin"
+    },
+
+    "email": {
+        "enabled": false,
+        "service": "smtp.sendgrid.net",
+        "secure": true,
+        "port": 465,
+        "user": "apikey",
+        "pass": "{password}",
+        "from": "noReply@dgr.com"
+    },
+
+    "minio": {
+        "url": "s3.amazonaws.com",
+        "ssl": true,
+        "port": 443,
+        "accessKey": "access",
+        "secretKey": "secret",
+        "bucket": "bucket",
+        "bucketRegion": "bucketRegion"
+    }
+}
